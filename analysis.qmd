@@ -1,0 +1,272 @@
+---
+title: "R Notebook to compute restoration effort in Somalia (AARAN)"
+output: html_notebook
+---
+
+```{r}
+library(terra)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(mclust)
+
+set.seed(42)
+terraOptions(memfrac = 0.8, progress = 1)
+output_dir <- "outputs_report"
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+```
+
+```{r}
+tree_file <- "../raster/somalia_mosaic_ld/treecover/somalia_treecover_2024_2025_250m.tif"
+erosion_file <- "../raster/somalia_mosaic_ld/erosion/somalia_erosion_2024_2025_250m.tif"
+ph_file <- "../raster/somalia_mosaic_ld/ph/somalia_ph_2024_2025_250m.tif"
+soc_file <- "../raster/somalia_mosaic_ld/soc/somalia_2024_2025_soc.tif"
+rdr50_file <- "../raster/somalia_mosaic_ld/RDR50/RDR50_2024_2025_250m.tif"
+points_file <- "../raster/somalia_mosaic_ld/sample_df.csv"
+```
+
+```{r}
+ecosystem <- rast(c(tree_file, erosion_file, rdr50_file, ph_file, soc_file))
+names(ecosystem) <- c("TreeCover", "Erosion", "RDR50", "pH", "SOC")
+NAflag(ecosystem) <- -9999
+
+global(ecosystem, c("min", "max", "mean"), na.rm = TRUE)
+```
+
+```{r}
+plot(
+  ecosystem,
+  main = c("Tree Cover", "Erosion", "RDR50", "Soil pH", "Soil Organic Carbon")
+)
+```
+
+```{r}
+pts <- read.csv(points_file) |>
+  terra::vect(geom = c("x", "y"), crs = "EPSG:4326")
+
+pts <- terra::project(pts, terra::crs(ecosystem))
+sample_df <- terra::extract(ecosystem, pts, xy = TRUE, ID = FALSE) |> tidyr::drop_na()
+
+summary(sample_df)
+```
+
+```{r}
+set.seed(42)
+predictors <- c("TreeCover", "Erosion", "RDR50", "pH", "SOC")
+sample_scaled <- scale(as.matrix(sample_df[, predictors]))
+
+indicator_means <- attr(sample_scaled, "scaled:center")
+indicator_sds <- attr(sample_scaled, "scaled:scale")
+
+gmm_model <- Mclust(sample_scaled, G = 3, verbose = FALSE)
+
+cluster_data <- sample_df |>
+  mutate(cluster = as.integer(gmm_model$classification))
+
+
+table(cluster_data$cluster)
+
+```
+
+```{r}
+cluster_summary <- cluster_data |>
+  group_by(cluster) |>
+  summarise(
+    across(
+      c(TreeCover, Erosion, RDR50, pH, SOC),
+      list(
+        median = ~median(.x, na.rm = TRUE),
+        Q25 = ~quantile(.x, 0.25, na.rm = TRUE),
+        Q75 = ~quantile(.x, 0.75, na.rm = TRUE)
+      )
+    ),
+    n = n(),
+    .groups = "drop"
+  )
+
+knitr::kable(cluster_summary)
+```
+
+```{r}
+cluster_data |>
+  pivot_longer(TreeCover:SOC, names_to = "Indicator", values_to = "Value") |>
+  ggplot(aes(factor(cluster), Value, fill = factor(cluster))) +
+  geom_boxplot(outlier.alpha = 0.1) +
+  facet_wrap(~Indicator, scales = "free_y") +
+  theme_minimal() +
+  guides(fill = "none")
+```
+
+```{r}
+vals <- terra::values(ecosystem)
+ok <- complete.cases(vals)
+
+cls <- rep(NA_integer_, nrow(vals))
+cls[ok] <- predict(
+  gmm_model,
+  newdata = scale(vals[ok, , drop = FALSE], indicator_means, indicator_sds)
+)$classification
+
+cluster_raster <- ecosystem[[1]]
+values(cluster_raster) <- cls
+names(cluster_raster) <- "cluster"
+
+writeRaster(cluster_raster, file.path(output_dir, "AARAN_ecosystem_GMM_clusters.tif"), overwrite = TRUE)
+plot(cluster_raster, main = "GMM Ecosystem Clusters")
+```
+
+```{r}
+# Assign classes after looking at the summary table (assigned low effort to cluster 2 instead due to the higher SOC and low erosion although cluster one had higher tree cover)
+manual_classification <- data.frame(
+  cluster = 1:3,
+  effort_class = c(2, 1, 3),
+  restoration_effort = c("Medium effort", "Low effort", "High effort")
+)
+
+knitr::kable(manual_classification)
+```
+
+```{r}
+restoration_effort <- terra::classify(
+  cluster_raster,
+  as.matrix(manual_classification[, c("cluster", "effort_class")]),
+  filename = file.path(output_dir, "AARAN_restoration_effort.tif"),
+  overwrite = TRUE
+)
+
+levels(restoration_effort) <- data.frame(
+  ID = 1:3,
+  restoration_effort = c("Low effort", "Medium effort", "High effort")
+)
+
+plot(restoration_effort, main = "Restoration Effort")
+```
+```{r}
+cluster_data <- sample_df |>
+  mutate(cluster = as.integer(gmm_model$classification)) |>
+  left_join(manual_classification, by = "cluster") |>
+  mutate(
+    met_low    = as.integer(restoration_effort == "Low effort"),
+    met_medium = as.integer(restoration_effort == "Medium effort"),
+    met_high   = as.integer(restoration_effort == "High effort")
+  )
+
+cluster_data
+```
+```{r}
+library(randomForest)
+set.seed(42)
+
+predictors <- c("TreeCover", "Erosion", "RDR50", "pH", "SOC")
+```
+
+
+```{r}
+# model for low effort restoration areas
+set.seed(42)
+
+rf_low <- randomForest(
+  x = cluster_data[, predictors],
+  y = factor(cluster_data$met_low),
+  ntree = 500,
+  importance = TRUE,
+  sampsize = c("0" = 6500, "1" = 6500)
+)
+saveRDS(rf_low, file.path(output_dir, "AARAN_rf_low.rds"))
+rf_low
+```
+
+```{r}
+# model for medium effort restoration areas
+set.seed(42)
+rf_medium <- randomForest(
+  x = cluster_data[, predictors],
+  y = factor(cluster_data$met_medium),
+  ntree = 500,
+  importance = TRUE,
+  sampsize = c("0" = 6500, "1" = 6500)
+)
+saveRDS(rf_medium, file.path(output_dir, "AARAN_rf_medium.rds"))
+rf_medium
+```
+
+```{r}
+# model for high effort restoration areas
+set.seed(42) 
+rf_high <- randomForest(
+  x = cluster_data[, predictors],
+  y = factor(cluster_data$met_high),
+  ntree = 500,
+  importance = TRUE,
+  sampsize = c("0" = 3800, "1" = 3800)
+)
+saveRDS(rf_high, file.path(output_dir, "AARAN_rf_high.rds"))
+rf_high
+```
+```{r}
+# plot the variables in order of importance (I used mean decrease accuracy because it ranks based on the influence of the indicator in increasing model error when moved about)
+# =======================================
+plot_importance <- function(rf_model, title) {
+  imp_df <- as.data.frame(importance(rf_model)) |>
+    tibble::rownames_to_column("Variable") |>
+    arrange(desc(MeanDecreaseGini))
+
+  ggplot(imp_df, aes(x = reorder(Variable, MeanDecreaseAccuracy), y = MeanDecreaseAccuracy)) +
+    geom_col(fill = "steelblue") +
+    coord_flip() +
+    labs(title = title, x = NULL, y = "Mean Decrease Accuracy") +
+    theme_minimal()
+}
+
+plot_importance(rf_low, "Variable Importance - Low Effort")
+plot_importance(rf_medium, "Variable Importance - Medium Effort")
+plot_importance(rf_high, "Variable Importance - High Effort")
+```
+```{r}
+prob_low <- terra::predict(
+  ecosystem, rf_low,
+  type = "prob", index = 2,
+  na.rm = TRUE,
+  filename = file.path(output_dir, "AARAN_effort_prob_low.tif"),
+  overwrite = TRUE
+)
+names(prob_low) <- "low_effort_probability"
+plot(prob_low, main = "Predicted Probability - Low Effort")
+```
+
+```{r}
+prob_medium <- terra::predict(
+  ecosystem, rf_medium,
+  type = "prob", index = 2,
+  na.rm = TRUE,
+  filename = file.path(output_dir, "AARAN_effort_prob_medium.tif"),
+  overwrite = TRUE
+)
+names(prob_medium) <- "medium_effort_probability"
+plot(prob_medium, main = "Predicted Probability - Medium Effort")
+```
+
+```{r}
+prob_high <- terra::predict(
+  ecosystem, rf_high,
+  type = "prob", index = 2,
+  na.rm = TRUE,
+  filename = file.path(output_dir, "AARAN_effort_prob_high.tif"),
+  overwrite = TRUE
+)
+names(prob_high) <- "high_effort_probability"
+plot(prob_high, main = "Predicted Probability - High Effort")
+```
+```{r}
+# Create rgb raster
+output_dir <- "../raster/somalia_mosaic_ld/"
+
+high   <- rast(file.path(output_dir, "AARAN_effort_prob_high.tif"))
+medium <- rast(file.path(output_dir, "AARAN_effort_prob_medium.tif"))
+low    <- rast(file.path(output_dir, "AARAN_effort_prob_low.tif"))
+
+effort_rgb <- c(high, medium, low) * 255
+names(effort_rgb) <- c("High", "Medium", "Low")
+
+plotRGB(effort_rgb, stretch = "lin", main = "Restoration Effort Probability")
+`

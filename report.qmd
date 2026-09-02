@@ -1,0 +1,220 @@
+---
+title: "AARAN Somalia Restoration Effort Report"
+author: "SPACIAL"
+date: "September 2nd, 2026"
+toc: true
+format:
+  html:
+    self-contained: true
+    code-tools: false
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+library(terra)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+
+output_dir <- "outputs_report"
+figure_dir <- "report_pngs"
+
+effort_file <- file.path(output_dir, "AARAN_restoration_effort.tif")
+cluster_file <- file.path(output_dir, "AARAN_ecosystem_GMM_clusters.tif")
+prob_files <- c(
+  Low = file.path(output_dir, "AARAN_effort_prob_low.tif"),
+  Medium = file.path(output_dir, "AARAN_effort_prob_medium.tif"),
+  High = file.path(output_dir, "AARAN_effort_prob_high.tif")
+)
+importance_pngs <- c(
+  Low = file.path(figure_dir, "AARAN_importance_low.png"),
+  Medium = file.path(figure_dir, "AARAN_importance_medium.png"),
+  High = file.path(figure_dir, "AARAN_importance_high.png")
+)
+
+effort_labels <- c("Low restoration effort", "Medium restoration effort", "High restoration effort")
+effort_cols <- c("#2A9D8F", "#E9C46A", "#E76F51")
+mclust_reclass <- data.frame(cluster = 1:3, effort_class = c(2, 1, 3))
+
+effort_raster <- function() {
+  if (file.exists(cluster_file)) {
+    out <- terra::classify(rast(cluster_file), as.matrix(mclust_reclass))
+    levels(out) <- data.frame(ID = 1:3, restoration_effort = effort_labels)
+    return(out)
+  }
+  if (file.exists(effort_file)) return(rast(effort_file))
+  NULL
+}
+```
+
+## Introduction
+
+This report summarizes restoration effort across Somalia for the AARAN analysis. Restoration effort is interpreted as a three-class outcome: low, medium, and high effort. The classes are derived from a model-based clustering workflow using five biophysical indicators: tree cover, erosion, root depth restriction at 50 cm, soil pH, and soil organic carbon.
+
+The purpose of the report is to give an overview across the country, watershed and cluster level, and to provide a summary of the indicator values associated with each restoration effort class. The report is intended for use by AARAN and other stakeholders to inform restoration planning and prioritization.
+
+## Methods
+
+Five raster indicators were used as the ecological input stack: tree cover, erosion, RDR50, pH, and SOC. Existing random points generated from QGIS were used to sample the raster stack. Sampled indicator values were standardized and clustered into three groups using Gaussian mixture modelling with `mclust`.
+
+The three resulting classes were manually interpreted as restoration effort classes: Mclust class 1 is medium effort, class 2 is low effort, and class 3 is high effort. Separate random forest models were then used to represent each class against the same indicator set, producing class specific probability surfaces and variable importance graphs.
+
+The reporting workflow uses three output groups:
+
+- Mclust cluster and restoration effort rasters
+- Random forest probability rasters for low, medium, and high effort
+- Variable-importance graphs for low, medium, and high effort surfaces
+
+## Mclust Results
+
+The Mclust model produced three restoration-effort groups. These groups provide the main classification used in the report. The table below should be interpreted alongside the map and RF outputs rather than as a final ecological ranking on its own.
+
+```{r}
+kable(
+  mclust_reclass |>
+    mutate(restoration_effort = effort_labels[effort_class]),
+  col.names = c("Mclust class", "Effort class", "Restoration effort")
+)
+```
+
+```{r}
+effort <- effort_raster()
+
+if (!is.null(effort)) {
+  area <- cellSize(effort, unit = "km")
+  effort_area <- as.data.frame(c(effort, area), na.rm = TRUE)
+  names(effort_area) <- c("effort_class", "area_km2")
+
+  effort_summary <- effort_area |>
+    group_by(effort_class) |>
+    summarise(area_km2 = sum(area_km2), .groups = "drop") |>
+    mutate(
+      restoration_effort = effort_labels[effort_class],
+      area_percent = area_km2 / sum(area_km2)
+    ) |>
+    select(restoration_effort, area_km2, area_percent)
+
+  kable(effort_summary, digits = 2)
+} else {
+  cat("Attach or generate the Mclust cluster raster at: ", cluster_file)
+}
+```
+
+```{r}
+effort <- effort_raster()
+
+if (!is.null(effort)) {
+  plot(effort, col = effort_cols, main = "Reclassified Mclust Restoration Effort")
+} else {
+  cat("Attach or generate the Mclust cluster raster at: ", cluster_file)
+}
+```
+
+## Random Forest Results
+
+Three random forest models were used to evaluate low, medium, and high restoration effort. Each model produces a class-specific probability surface and a variable-importance graph showing which indicators contribute most to that class prediction.
+
+### Low Restoration Effort
+
+```{r}
+if (file.exists(prob_files["Low"])) {
+  plot(rast(prob_files["Low"]), main = "RF Probability: Low Restoration Effort")
+} else {
+  cat("Attach or generate the low-effort RF probability raster at: ", prob_files["Low"])
+}
+```
+
+```{r}
+if (file.exists(importance_pngs["Low"])) {
+  include_graphics(importance_pngs["Low"])
+} else {
+  cat("Attach the low-effort variable-importance PNG at: ", importance_pngs["Low"])
+}
+```
+
+### Medium Restoration Effort
+
+```{r}
+if (file.exists(prob_files["Medium"])) {
+  plot(rast(prob_files["Medium"]), main = "RF Probability: Medium Restoration Effort")
+} else {
+  cat("Attach or generate the medium-effort RF probability raster at: ", prob_files["Medium"])
+}
+```
+
+```{r}
+if (file.exists(importance_pngs["Medium"])) {
+  include_graphics(importance_pngs["Medium"])
+} else {
+  cat("Attach the medium-effort variable-importance PNG at: ", importance_pngs["Medium"])
+}
+```
+
+### High Restoration Effort
+
+```{r}
+if (file.exists(prob_files["High"])) {
+  plot(rast(prob_files["High"]), main = "RF Probability: High Restoration Effort")
+} else {
+  cat("Attach or generate the high-effort RF probability raster at: ", prob_files["High"])
+}
+```
+
+```{r}
+if (file.exists(importance_pngs["High"])) {
+  include_graphics(importance_pngs["High"])
+} else {
+  cat("Attach the high-effort variable-importance PNG at: ", importance_pngs["High"])
+}
+```
+
+## Country-Level Overview
+
+At country level, the restoration-effort map shows the spatial distribution of low, medium, and high effort areas. The area graph summarizes how many square kilometers fall within each effort class.
+
+```{r}
+effort <- effort_raster()
+
+if (!is.null(effort)) {
+  plot(effort, col = effort_cols, main = "Somalia Restoration Effort")
+} else {
+  cat("Attach or generate the country restoration-effort map raster at: ", cluster_file)
+}
+```
+
+```{r}
+effort <- effort_raster()
+
+if (!is.null(effort)) {
+  area_df <- as.data.frame(c(effort, cellSize(effort, unit = "km")), na.rm = TRUE)
+  names(area_df) <- c("effort_class", "area_km2")
+
+  area_summary <- area_df |>
+    group_by(effort_class) |>
+    summarise(area_km2 = sum(area_km2), .groups = "drop") |>
+    mutate(restoration_effort = factor(effort_labels[effort_class], effort_labels))
+
+  ggplot(area_summary, aes(restoration_effort, area_km2, fill = restoration_effort)) +
+    geom_col(width = 0.65) +
+    scale_fill_manual(values = effort_cols) +
+    labs(x = "Restoration effort class", y = "Area (km2)", fill = NULL) +
+    theme_minimal() +
+    theme(legend.position = "none")
+} else {
+  cat("Attach or generate the country restoration-effort raster at: ", cluster_file)
+}
+```
+
+```{r}
+if (exists("area_summary")) {
+  kable(area_summary, digits = 2)
+}
+```
+
+## Conclusion
+
+The output shows that about 41% of Somalia is classified as medium restoration effort, 38% as low, and 21% as high. The variable importance graphs indicate that tree cover and pH are the most influential indicators for predicting restoration effort classes. These results can inform restoration planning and prioritization across Somalia.
