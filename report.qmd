@@ -85,8 +85,11 @@ The reporting workflow uses three output groups:
 - Variable-importance graphs for low, medium, and high effort surfaces
 
 ## Results
+@fig-indicators_distr_som shows the distribution of indicator values for the random points used to generate land restoration effort clusters across Somalia. We see that SOC is low overall (median SOC below 10 g/kg), but with some sampled locations with SOC higher than 20 g/kg. Erosion is high overall (median > 60%), tree cover is highly variable, while pH ranges mostly from neutral to alkaline, many plots having pH > 7.5.
 
-The Mclust model produced three restoration-effort groups. **Add figure and discuss this, then move on to the table and the cluster assignments.**
+![Graph showing the distribution of indicator values for the randomly sampled points used to generate land restoration effort custers](report_pngs/AARAN_indicator_distributions.png){#fig-indicators_distr_som}
+
+The Mclust model produced three restoration-effort groups. **Add figure with distributions per group -- similar to the above figure - and discuss this, then move on to the table and the cluster assignments.**
 
 These groups provide the main classification used in the report. @tbl-mclust-restoration should be interpreted alongside the map and RF outputs rather than as a final ecological ranking on its own.
 
