@@ -2,3 +2,8 @@ outputs_report
 .quarto
 report.html
 .DS_Store
+/.quarto/
+**/*.quarto_ipynb
+.vscode/settings.json
+report.pdf
+data/

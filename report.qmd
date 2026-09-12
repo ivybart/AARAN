@@ -1,9 +1,15 @@
 ---
-title: "AARAN Somalia Restoration Effort Report"
-author: "SPACIAL"
-date: "September 2nd, 2026"
+title: "AARAN, Somalia"
+subtitle: "Land Restoration Prioritization Report"
+author: "Ivy Bartonjo and Tor-G. Vågen"
+date: "September 2, 2026"
 toc: true
 format:
+  typst:
+    template-partials:
+      - typst-template.typ
+      - typst-show.typ
+    fig-format: png
   html:
     self-contained: true
     code-tools: false
@@ -51,17 +57,26 @@ effort_raster <- function() {
 }
 ```
 
+{{< pagebreak >}}
+
 ## Introduction
 
-This report summarizes restoration effort across Somalia for the AARAN analysis. Restoration effort is interpreted as a three-class outcome: low, medium, and high effort. The classes are derived from a model-based clustering workflow using five biophysical indicators: tree cover, erosion, root depth restriction at 50 cm, soil pH, and soil organic carbon.
+This report presents the results of land health analysis and assessment of restoration effort to support the prioritisation of land restoration interventions in Somalia for the AARAN project. Restoration effort is assessed using soil and land health indicator maps, which are clustered into low, medium, and high restoration effort, respectively. The classes are derived from a model-based clustering workflow using five biophysical indicators: tree cover, erosion, root depth restriction at 50 cm, soil pH, and soil organic carbon (SOC).
 
-The purpose of the report is to give an overview across the country, watershed and cluster level, and to provide a summary of the indicator values associated with each restoration effort class. The report is intended for use by AARAN and other stakeholders to inform restoration planning and prioritization.
+The purpose of the report is to give an overview at country, watershed and cluster level, and to provide a summary of the indicator values associated with each restoration effort class. The report is intended for use by AARAN and other stakeholders to inform restoration planning and prioritization.
+
+::: {.callout-note icon=false}
+## Key Findings Summary
+- **National Effort Distribution**: Approximately **41%** Medium restoration effort, **38%** Low restoration effort, and **21%** High restoration effort.
+- **Biophysical Clustering**: Five indicators (tree cover, erosion, RDR50, soil pH, and SOC) grouped into 3 distinct operational management classes via Gaussian mixture modeling (`mclust`).
+- **Primary Predictive Drivers**: Tree cover and soil pH consistently show the highest predictive influence across class-specific Random Forest probability models.
+:::
 
 ## Methods
 
-Five raster indicators were used as the ecological input stack: tree cover, erosion, RDR50, pH, and SOC. Existing random points generated from QGIS were used to sample the raster stack. Sampled indicator values were standardized and clustered into three groups using Gaussian mixture modelling with `mclust`.
+Randomly generated points were generated and raster values for tree cover, erosion, RDR50, pH, and SOC were extracted for each point. Sampled indicator values were standardized and clustered into three groups using R Statistics through the `mclust` library. This approach groups multi-dimensional biophysical indicators into distinct classes based on underlying probabilistic Gaussian mixture models.
 
-The three resulting classes were manually interpreted as restoration effort classes: Mclust class 1 is medium effort, class 2 is low effort, and class 3 is high effort. Separate random forest models were then used to represent each class against the same indicator set, producing class specific probability surfaces and variable importance graphs.
+The three resulting classes were manually interpreted as restoration effort classes based on the distribution of indicator values in each cluster. The cluster (group) with high erosion, low SOC, and acidic or alkaline pH was classified as high effort, while the cluster with low erosion, higher SOC and neutral pH was classified as low effort. The cluster with intermediate indicator values was classified as moderate effort. Separate random forest models were then used to represent each class against the same indicator set, producing class specific probability surfaces and variable importance graphs.
 
 The reporting workflow uses three output groups:
 
@@ -69,11 +84,26 @@ The reporting workflow uses three output groups:
 - Random forest probability rasters for low, medium, and high effort
 - Variable-importance graphs for low, medium, and high effort surfaces
 
-## Mclust Results
+## Results
+@fig-indicators_distr_som shows the distribution of indicator values for the random points used to generate land restoration effort clusters across Somalia. We see that SOC is low overall (median SOC below 10 g/kg), but with some sampled locations with SOC higher than 20 g/kg. Erosion is high overall (median > 60%), tree cover is highly variable, while pH ranges mostly from neutral to alkaline, many plots having pH > 7.5.
 
-The Mclust model produced three restoration-effort groups. These groups provide the main classification used in the report. The table below should be interpreted alongside the map and RF outputs rather than as a final ecological ranking on its own.
+![Graph showing the distribution of indicator values for the randomly sampled points used to generate land restoration effort custers](report_pngs/AARAN_indicator_distributions.png){#fig-indicators_distr_som}
+
+The Mclust model produced three restoration-effort groups. **Add figure with distributions per group -- similar to the above figure - and discuss this, then move on to the table and the cluster assignments.**
+
+These groups provide the main classification used in the report. @tbl-mclust-restoration should be interpreted alongside the map and RF outputs rather than as a final ecological ranking on its own.
 
 ```{r}
+#| label: fig-cluster_distribution
+#| fig-cap: "Boxplots showing the distribution of indicator values in each cluster."
+#| 
+## Need a graph here (boxplot) showing the distribution of extracted SOC, pH, erosion, etc in each cluster.
+```
+
+```{r}
+#| label: tbl-mclust-restoration
+#| tbl-cap: "Classification of restoration effort based on Mclust classes."
+#| 
 kable(
   mclust_reclass |>
     mutate(restoration_effort = effort_labels[effort_class]),
