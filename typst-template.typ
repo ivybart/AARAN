@@ -1,4 +1,4 @@
-// Modern Typst Template for AARAN Technical & Spatial Reports
+// Modern Typst Template for AARAN Technical and Spatial Reports
 // Author: ICRAF SPACIAL
 
 #let aaran-report(
@@ -10,6 +10,7 @@
   toc-title: "Table of Contents",
   toc-depth: 2,
   cover-page: false,
+  logo: none,
   doc
 ) = {
   // Brand color palette
@@ -70,7 +71,7 @@
     footer: context {
       let page-num = counter(page).get().first()
       let total-pages = counter(page).final().first()
-      if (not cover-page) or (cover-page and page-num > 1) [
+      if page-num > 1 [
         #line(length: 100%, stroke: 0.5pt + border-light)
         #v(-0.4em)
         #grid(
@@ -87,6 +88,16 @@
   )
 
   // Heading styles
+  set heading(numbering: "1.1")
+
+  // Show section numbers only for numbered headings (respects .unnumbered)
+  let sec-num(it) = {
+    if it.numbering != none {
+      context counter(heading).display(it.numbering)
+      h(6pt)
+    }
+  }
+
   show heading.where(level: 1): it => block(above: 2em, below: 1.1em, breakable: false)[
     #box(
       baseline: 0%,
@@ -94,17 +105,26 @@
         columns: (auto, 1fr),
         gutter: 8pt,
         rect(width: 4.5pt, height: 1.15em, fill: brand-teal, radius: 2pt),
-        text(size: 13.5pt, weight: "bold", fill: brand-dark)[#it.body]
+        text(size: 13.5pt, weight: "bold", fill: brand-dark)[
+          #sec-num(it)
+          #it.body
+        ]
       )
     )
   ]
 
   show heading.where(level: 2): it => block(above: 1.5em, below: 0.8em, breakable: false)[
-    #text(size: 11pt, weight: "bold", fill: brand-teal)[#it.body]
+    #text(size: 11pt, weight: "bold", fill: brand-teal)[
+      #sec-num(it)
+      #it.body
+    ]
   ]
 
   show heading.where(level: 3): it => block(above: 1.2em, below: 0.6em, breakable: false)[
-    #text(size: 10pt, weight: "bold", fill: brand-dark)[#it.body]
+    #text(size: 10pt, weight: "bold", fill: brand-dark)[
+      #sec-num(it)
+      #it.body
+    ]
   ]
 
   // Table styling
@@ -128,6 +148,7 @@
   show link: set text(fill: brand-teal, weight: "medium")
 
   // Figures & Captions
+  show figure.caption: set align(left)
   show figure.caption: it => [
     #v(0.3em)
     #text(size: 8.5pt, fill: text-muted, weight: "medium")[
@@ -157,6 +178,10 @@
     // Full modern cover page
     page(header: none, footer: none)[
       #v(3cm)
+      #if logo != none [
+        #image(logo, height: 3cm)
+        #v(0.8em)
+      ]
       #rect(width: 32pt, height: 4pt, fill: brand-teal, radius: 2pt)
       #v(0.8em)
       #text(size: 10pt, weight: "bold", fill: brand-teal, tracking: 1.5pt)[
@@ -170,11 +195,11 @@
         #v(0.6em)
         #text(size: 14pt, fill: text-muted)[#subtitle]
       ]
-      
+
       #v(1.5cm)
       #line(length: 100%, stroke: 1pt + brand-teal)
       #v(0.8em)
-      
+
       #grid(
         columns: (1fr, 1fr),
         row-gutter: 0.8em,
@@ -189,7 +214,7 @@
           #text(size: 11pt, weight: "bold", fill: brand-dark)[#date]
         ]
       )
-      
+
       #v(1fr)
       #rect(
         width: 100%,
@@ -218,9 +243,11 @@
       )[
         #grid(
           columns: (1fr, auto),
-          text(size: 8pt, weight: "bold", fill: brand-teal, tracking: 1.5pt)[
-            
-          ],
+          if logo != none {
+            image(logo, height: 2.2cm)
+          } else {
+            text(size: 15pt, weight: "bold", fill: brand-teal, tracking: 2pt)[ICRAF]
+          },
           text(size: 8pt, weight: "bold", fill: brand-coral, tracking: 1pt)[
             ICRAF Spatial Data Science and Applied Learning Lab (SPACIAL)
           ]
@@ -254,19 +281,23 @@
     ]
   }
 
-  // Table of Contents
+  // Table of Contents (own page, no header/footer; numbering continues so content starts on page 3)
   if toc {
-    block(
-      width: 100%,
-      fill: rgb("#FAFAFA"),
-      stroke: 0.5pt + border-light,
-      radius: 5pt,
-      inset: 14pt,
-      below: 2em
-    )[
-      #text(size: 11pt, weight: "bold", fill: brand-dark)[#toc-title]
-      #v(0.6em)
-      #outline(title: none, depth: toc-depth, indent: 1.5em)
+    pagebreak()
+    page(header: none, footer: none)[
+      #v(1.5cm)
+      #block(
+        width: 100%,
+        fill: rgb("#FAFAFA"),
+        stroke: 0.5pt + border-light,
+        radius: 5pt,
+        inset: 14pt,
+        below: 2em
+      )[
+        #text(size: 11pt, weight: "bold", fill: brand-dark)[#toc-title]
+        #v(0.6em)
+        #outline(title: none, depth: toc-depth, indent: 1.5em)
+      ]
     ]
   }
 
