@@ -40,8 +40,7 @@
 
   set par(
     justify: true,
-    leading: 0.72em,
-    spacing: 1.2em
+    leading: 0.72em
   )
 
   // Page setup & Running headers/footers

@@ -140,6 +140,8 @@ The results indicate that SOC is a strong predictor of high restoration effort, 
 At country level, the restoration-effort map shows the spatial distribution of low, medium, and high effort areas. The area graph summarizes how many square kilometers fall within each effort class.
 
 ```{r}
+#| label: fig-country-restoration-effort-map
+#| fig-cap: "Restoration effort classes across Somalia."
 effort <- effort_raster()
 
 if (!is.null(effort)) {
@@ -150,6 +152,8 @@ if (!is.null(effort)) {
 ```
 
 ```{r}
+#| label: fig-country-restoration-effort-area
+#| fig-cap: "Area of Somalia under low, medium, and high restoration effort."
 effort <- effort_raster()
 
 if (!is.null(effort)) {
@@ -177,6 +181,100 @@ if (exists("area_summary")) {
   kable(area_summary, digits = 2)
 }
 ```
+
+![Share of restoration concern classes by watershed.](docx_media/image10.png){#fig-watershed-concern-composition}
+
+![Share of restoration concern classes by selected project cluster.](docx_media/image19.png){#fig-cluster-concern-composition}
+
+## Watershed and Cluster-Level Analysis
+
+Degradation levels vary considerably between the project clusters, and therefore the level of restoration concern and the recommended restoration practices also vary by cluster. The distribution of the three concern classes across watersheds shows that Watershed 8 in the Nugaal region has the highest percentage of area under high concern, while Watersheds 5 and 6 in Bay region have little to no area under high concern.
+
+At cluster level, `KAALO_7` in Nugaal has the highest percentage of area under high concern. `GREDO_7` and `GREDO_6` in Bay have very limited high concern area, while `CWW_8` in Gedo is entirely under low concern. The analysis can therefore be broken down by watershed and by the cluster contained within each watershed.
+
+### Watershed 1 and KAALO_6
+
+Watershed 1 contains the `KAALO_6` cluster. Indicator distributions compare country and watershed medians, while the cluster summary compares country, watershed and cluster medians. Under the high concern class, erosion and pH distributions are shifted toward higher values, indicating more severe erosion and less favourable pH conditions. In contrast, SOC, RDR50 and tree cover are shifted toward lower values, reflecting reduced soil carbon, shallower effective rooting depth and sparser vegetation in high concern areas.
+
+![Restoration concern map for Watershed 1 and the KAALO_6 cluster.](docx_media/image32.png){#fig-watershed-1-map}
+
+![Watershed 1 indicator distributions by restoration concern class.](docx_media/image3.png){#fig-watershed-1-distribution}
+
+![KAALO_6 indicator distributions by restoration concern class.](docx_media/image15.png){#fig-kaalo-6-distribution}
+
+Across high concern indicators, the watershed median is generally higher than the national median, except for SOC, where the watershed median is lower. This suggests that, relative to the country, Watershed 1 experiences more intense erosion, more extreme pH and greater root-depth restriction, with lower soil organic carbon but higher tree cover. Across indicators, the `KAALO_6` median is generally higher than the national and watershed medians, except for SOC, where it is lower than the country median but higher than the watershed median.
+
+### Watershed 2 and KAALO_1
+
+Watershed 2 contains the `KAALO_1` cluster. Across high concern indicators, the watershed median is generally lower than the national median. This suggests that, relative to the country, the watershed has relatively lower pH and root-depth restriction, higher soil organic carbon and higher tree cover, while erosion remains an important pressure.
+
+![Restoration concern map for Watershed 2 and the KAALO_1 cluster.](docx_media/image23.png){#fig-watershed-2-map}
+
+![Watershed 2 indicator distributions by restoration concern class.](docx_media/image28.png){#fig-watershed-2-distribution}
+
+![KAALO_1 indicator distributions by restoration concern class.](docx_media/image1.png){#fig-kaalo-1-distribution}
+
+Across indicators, the `KAALO_1` median generally lies between the country and watershed medians for erosion, is higher than both for root depth restriction, and lower for SOC and tree cover. This pattern suggests that `KAALO_1` experiences intermediate erosion pressure but more severe physical rooting constraints than either the broader watershed or the country average. Lower SOC and tree cover imply weaker vegetation structure and reduced carbon storage, pointing to conditions that may be more vulnerable to further decline unless restoration specifically targets vegetation recovery and SOC accumulation.
+
+### Watershed 3 and CWW_4
+
+Watershed 3 contains the `CWW_4` cluster. Across high concern indicators, the watershed median is generally lower than the national median, except for erosion and tree cover, where the watershed median is higher. This indicates that the watershed experiences stronger erosion pressure and higher tree cover, but relatively lower pH, lower root-depth restriction and higher soil organic carbon compared with the national scale.
+
+![Restoration concern map for Watershed 3 and the CWW_4 cluster.](docx_media/image9.png){#fig-watershed-3-map}
+
+![Watershed 3 indicator distributions by restoration concern class.](docx_media/image12.png){#fig-watershed-3-distribution}
+
+![CWW_4 indicator distributions by restoration concern class.](docx_media/image7.png){#fig-cww-4-distribution}
+
+Across indicators, the `CWW_4` median is lower than the country and watershed medians for root depth restriction, SOC and tree cover, but higher than both for erosion and intermediate for pH. These results suggest that the cluster faces stronger erosion pressure, more severe root-depth restriction, and reduced vegetation and SOC relative to the country and watershed scales, while experiencing intermediate pH conditions.
+
+### Watersheds 5 and 6 with GREDO_6 and GREDO_7
+
+Watersheds 5 and 6 contain the `GREDO_6` and `GREDO_7` clusters. No areas in these watersheds meet the high-concern class; conditions are dominated by medium concern followed by low concern. This is consistent with landscapes where severe degradation is limited and most areas fall into moderate or better condition classes.
+
+![Restoration concern map for Watersheds 5 and 6 and the GREDO_6 and GREDO_7 clusters.](docx_media/image18.png){#fig-watershed-5-6-map}
+
+![Watersheds 5 and 6 indicator distributions by restoration concern class.](docx_media/image30.png){#fig-watershed-5-6-distribution}
+
+![GREDO_6 indicator distributions by restoration concern class.](docx_media/image27.png){#fig-gredo-6-distribution}
+
+For `GREDO_6`, the median is lower than the country and watershed medians for root depth restriction and tree cover, but higher than both for pH and SOC. Erosion is intermediate, with the country erosion median higher than the cluster median. This suggests shallower effective rooting depth and more sparse tree cover than the broader regions, but more favourable pH, higher SOC and lower erosion compared with the national scale.
+
+![GREDO_7 indicator distributions by restoration concern class.](docx_media/image2.png){#fig-gredo-7-distribution}
+
+For `GREDO_7`, the median is lower than the country and watershed medians for pH, higher than both for root depth restriction and tree cover, and intermediate for erosion and SOC. This suggests less favourable pH conditions but deeper effective rooting depth and denser tree cover than both broader scales. Erosion pressure is moderately lower than the country median but slightly above the watershed median, while SOC is better than the country overall but not as high as the watershed median.
+
+### Watershed 7 and CWW_8
+
+Watershed 7 contains the `CWW_8` cluster. Across high concern indicators, the watershed median is generally lower than the country median, except for SOC and pH, where the watershed median is higher. This suggests that the watershed has higher soil organic carbon and slightly higher pH in high concern areas, while erosion, root depth restriction and tree cover tend to be lower.
+
+![Restoration concern map for Watershed 7 and the CWW_8 cluster.](docx_media/image20.png){#fig-watershed-7-map}
+
+![Watershed 7 indicator distributions by restoration concern class.](docx_media/image14.png){#fig-watershed-7-distribution}
+
+![CWW_8 indicator distributions by restoration concern class.](docx_media/image5.png){#fig-cww-8-distribution}
+
+Across indicators, the `CWW_8` median is lower than the country and watershed medians for erosion and root depth restriction, but higher for pH and SOC, and lower for tree cover. The cluster falls entirely within the low-concern class, so restoration efforts should focus on conservation and enhancing vegetation cover to maintain and improve existing conditions.
+
+### Watershed 8 and KAALO_7
+
+Watershed 8 contains the `KAALO_7` cluster. The watershed and cluster are dominated by high concern. Across high concern indicators, the watershed median is generally lower than the national median, except for erosion and pH, where the watershed median is higher. This suggests that, relative to the country, the watershed experiences more intense degradation across key indicators.
+
+![Restoration concern map for Watershed 8 and the KAALO_7 cluster.](docx_media/image11.png){#fig-watershed-8-map}
+
+![Watershed 8 indicator distributions by restoration concern class.](docx_media/image16.png){#fig-watershed-8-distribution}
+
+![KAALO_7 indicator distributions by restoration concern class.](docx_media/image17.png){#fig-kaalo-7-distribution}
+
+For `KAALO_7`, the pattern closely matches its parent watershed. The median is lower than the national median for root depth restriction and tree cover, close to the watershed median for SOC, and higher for pH and erosion. This indicates that the cluster is generally more degraded than the broader national scale. Restoration efforts in `KAALO_7` should prioritize erosion control, soil conservation and increasing vegetation cover through interventions such as contour bunds, mulching and improved grazing management. Limited effective rooting depth may hinder the establishment of deep-rooted species; where feasible, soil decompaction could be considered before planting, or shallow-rooted, stress-tolerant species should be prioritized.
+
+## Restoration Recommendations
+
+**Low concern areas** generally exhibit favourable ecosystem conditions, including high tree cover, moderate SOC, nearly neutral pH and relatively high RDR50 values. Intensive restoration is unlikely to be required, although moderate to high erosion levels indicate that soil and water conservation measures could help prevent further degradation. Restoration should focus on protection, maintenance and erosion control while preserving existing vegetation.
+
+**Medium concern areas** exhibit mixed ecosystem conditions, characterized by moderate tree cover, relatively high SOC, slightly alkaline soils and intermediate root-depth restriction. The comparatively favourable soil conditions suggest that vegetation restoration remains feasible. Targeted tree planting, grass reseeding and improved grazing management may be appropriate where vegetation cover is declining or sparse. Localized soil and water conservation measures should also be considered, particularly in areas experiencing moderate or high erosion.
+
+**High concern areas** show the strongest indicators of degradation, including very low tree cover, high erosion, very low SOC, alkaline soil conditions and relatively low RDR50 values. Restoration will likely require more active, sustained and resource-intensive intervention. Soil and water conservation measures such as halfmoons, contour bunds and terraces should be prioritized to reduce erosion and improve water retention before or alongside vegetation restoration. In severely eroded locations, physical structures such as check dams or gabions may also be needed to stabilize channels and control sediment movement. Grass reseeding and targeted tree establishment can help increase vegetation cover and gradually rebuild SOC.
 
 ## Conclusion
 
