@@ -5,5 +5,4 @@ report.html
 /.quarto/
 **/*.quarto_ipynb
 .vscode/settings.json
-report.pdf
 data/

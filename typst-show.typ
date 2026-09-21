@@ -34,6 +34,7 @@ $endif$
 $if(toc-depth)$
   toc-depth: $toc-depth$,
 $endif$
+  logo: "report_pngs/icraf_logo.png",
 $if(cover-page)$
   cover-page: $cover-page$,
 $endif$
