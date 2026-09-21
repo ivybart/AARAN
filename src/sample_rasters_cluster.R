@@ -153,9 +153,9 @@ saveRDS(rf_cluster, model_rds)
 # Density plots for each indicator by cluster concern level
 # ------------------------------------------------------------------------------
 concern_cols <- c(
-  "Least concern"  = "#058005",
-  "Medium concern" = "blue",
-  "High concern"   = "red"
+  "Least concern"  = "#2A9D8F",
+  "Medium concern" = "#E9C46A",
+  "High concern"   = "#E76F51"
 )
 
 sample_df |>
@@ -163,11 +163,13 @@ sample_df |>
   pivot_longer(all_of(predictors), names_to = "Indicator", values_to = "Value") |>
   ggplot(aes(x = Value, fill = concern, color = concern)) +
   geom_density(alpha = 0.4) +
-  facet_wrap(~Indicator, scales = "free", ncol=1) +
+  facet_wrap(~Indicator, scales = "free", ncol = 1) +
   scale_fill_manual(values = concern_cols) +
   scale_color_manual(values = concern_cols) +
   labs(fill = "Concern", color = "Concern", x = "Value", y = "Density") +
   theme_minimal()
+
+ggsave("report_pngs/clusters_indicators_density.png", dpi=300)
 
 # ------------------------------------------------------------------------------
 # Variable importance: one panel per class (one-vs-rest RF models)
@@ -176,11 +178,10 @@ figure_dir <- "report_pngs"
 dir.create(figure_dir, showWarnings = FALSE, recursive = TRUE)
 
 class_labels <- c(
-  lc = "Low restoration effort",
-  mc = "Medium restoration effort",
-  hc = "High restoration effort"
+  lc = "Least concern",
+  mc = "Medium concern",
+  hc = "High concern"
 )
-effort_cols <- c("red", "#058005", "blue")
 
 imp_list <- lapply(names(class_labels), function(cl) {
   df <- sample_df
@@ -202,7 +203,7 @@ imp_list <- lapply(names(class_labels), function(cl) {
 imp_df <- bind_rows(imp_list) |>
   mutate(
     Class = factor(Class, levels = c(
-      "Low restoration effort", "Medium restoration effort", "High restoration effort"
+      "Least concern", "Medium concern", "High concern"
     ))
   )
 
@@ -212,9 +213,9 @@ imp_df |>
   facet_wrap(~Class, ncol = 3) +
   coord_flip() +
   scale_fill_manual(values = c(
-    "Low restoration effort" = "#2A9D8F",
-    "Medium restoration effort" = "#E9C46A",
-    "High restoration effort" = "#E76F51"
+    "Least concern" = "#2A9D8F",
+    "Medium concern" = "#E9C46A",
+    "High concern" = "#E76F51"
   )) +
   labs(
     title = "Variable importance for class prediction",

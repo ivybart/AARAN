@@ -90,6 +90,14 @@
   // Heading styles
   set heading(numbering: "1.1")
 
+  // Show section numbers only for numbered headings (respects .unnumbered)
+  let sec-num(it) = {
+    if it.numbering != none {
+      context counter(heading).display(it.numbering)
+      h(6pt)
+    }
+  }
+
   show heading.where(level: 1): it => block(above: 2em, below: 1.1em, breakable: false)[
     #box(
       baseline: 0%,
@@ -98,8 +106,7 @@
         gutter: 8pt,
         rect(width: 4.5pt, height: 1.15em, fill: brand-teal, radius: 2pt),
         text(size: 13.5pt, weight: "bold", fill: brand-dark)[
-          #context counter(heading).display("1.1")
-          #h(6pt)
+          #sec-num(it)
           #it.body
         ]
       )
@@ -108,16 +115,14 @@
 
   show heading.where(level: 2): it => block(above: 1.5em, below: 0.8em, breakable: false)[
     #text(size: 11pt, weight: "bold", fill: brand-teal)[
-      #context counter(heading).display("1.1")
-      #h(6pt)
+      #sec-num(it)
       #it.body
     ]
   ]
 
   show heading.where(level: 3): it => block(above: 1.2em, below: 0.6em, breakable: false)[
     #text(size: 10pt, weight: "bold", fill: brand-dark)[
-      #context counter(heading).display("1.1.1")
-      #h(6pt)
+      #sec-num(it)
       #it.body
     ]
   ]

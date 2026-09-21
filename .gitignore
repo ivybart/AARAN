@@ -1,4 +1,3 @@
-outputs_report
 .quarto
 report.html
 .DS_Store
@@ -6,3 +5,12 @@ report.html
 **/*.quarto_ipynb
 .vscode/settings.json
 data/
+outputs_report/Models/AARAN_rf_high.rds
+outputs_report/Models/AARAN_rf_low.rds
+outputs_report/Models/AARAN_rf_medium.rds
+outputs_report/Raster/RDR50_2024_2025_250m.tif
+outputs_report/Raster/somalia_2024_2025_soc.tif
+outputs_report/Raster/somalia_erosion_2024_2025_250m.tif
+outputs_report/Raster/somalia_ph_2024_2025_250m.tif
+outputs_report/Raster/somalia_treecover_2024_2025_250m.tif
+outputs_report/Vector_CSVs/sample_df.csv

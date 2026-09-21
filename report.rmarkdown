@@ -1,0 +1,272 @@
+---
+title: "AARAN, Somalia"
+subtitle: "Land Restoration Prioritization Report"
+author: "Ivy Bartonjo and Tor-G. Vågen"
+date: "September 2, 2026"
+toc: true
+bibliography: bibliography.bib
+format:
+  typst:
+    template-partials:
+      - typst-template.typ
+      - typst-show.typ
+    fig-format: png
+    bib-style: apa
+  html:
+    self-contained: true
+    code-tools: false
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+library(terra)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+
+output_dir <- "outputs_report"
+figure_dir <- "report_pngs"
+
+effort_file <- file.path(output_dir, "AARAN_restoration_effort.tif")
+cluster_file <- file.path(output_dir, "AARAN_ecosystem_GMM_clusters.tif")
+prob_files <- c(
+  Low = file.path(output_dir, "AARAN_effort_prob_low.tif"),
+  Medium = file.path(output_dir, "AARAN_effort_prob_medium.tif"),
+  High = file.path(output_dir, "AARAN_effort_prob_high.tif")
+)
+
+effort_labels <- c("Low restoration effort", "Medium restoration effort", "High restoration effort")
+effort_cols <- c("#2A9D8F", "#E9C46A", "#E76F51")
+mclust_reclass <- data.frame(cluster = 1:3, effort_class = c(2, 1, 3))
+
+effort_raster <- function() {
+  if (file.exists(cluster_file)) {
+    out <- terra::classify(rast(cluster_file), as.matrix(mclust_reclass))
+    levels(out) <- data.frame(ID = 1:3, restoration_effort = effort_labels)
+    return(out)
+  }
+  if (file.exists(effort_file)) return(rast(effort_file))
+  NULL
+}
+```
+
+{{< pagebreak >}}
+
+## Introduction
+
+This report presents the results of land health analysis and assessment of restoration effort to support the prioritisation of land restoration interventions in Somalia for the AARAN project. Restoration effort is assessed using soil and land health indicators, which are clustered into low, medium, and high restoration effort, respectively. The classes are derived from a model-based clustering workflow using five biophysical indicators: tree cover, erosion, root depth restriction at 50 cm, soil pH, and soil organic carbon (SOC).
+
+Throughout the report, restoration effort classes are also interpreted in terms of level of concern for land degradation. Areas classified as high restoration effort correspond to high concern, as they combine indicators associated with active or severe degradation, such as high erosion, low SOC, and unfavourable soil conditions. Conversely, areas of low restoration effort reflect comparatively healthy land and are of low concern. Medium effort areas fall between these extremes. Framing the classes in this way makes clear that the restoration effort gradient is simultaneously a gradient of degradation concern: where intervention needs (effort) are greatest, the underlying land health condition gives greatest cause for concern.
+
+The purpose of the report is to give an overview at country, watershed and cluster level, and to provide a summary of the indicator values associated with each restoration effort class. The report is intended for use by AARAN and other stakeholders to inform restoration planning and prioritization.
+
+::: {.callout-note icon=false}
+## Key Findings
+- **National Effort Distribution**: Approximately **41%** Medium restoration effort, **38%** Low restoration effort, and **21%** High restoration effort.
+- **Biophysical Clustering**: Five indicators (tree cover, erosion, RDR50, soil pH, and SOC) grouped into 3 distinct operational management classes via Gaussian mixture modeling (`mclust`).
+- **Primary Predictive Drivers**: Tree cover and soil pH consistently show the highest predictive influence across class-specific Random Forest probability models.
+:::
+
+## Methods {#sec-methods}
+
+### Study area and sampling design
+
+The assessment covers the whole of Somalia. To obtain a representative sample of the biophysical indicator values across the country, points were generated at random locations and the values of five indicators were extracted for each point from the raster layers described below. This sampling approach ensures that the full range of environmental conditions present in Somalia is captured, including areas that are remote or otherwise underrepresented in field campaigns.
+
+### Biophysical indicators
+
+The indicators used in this assessment are drawn from the Land Degradation Surveillance Framework (LDSF), a standardized field method developed by ICRAF (CIFOR-ICRAF) for assessing soil and land health [@vagen2013b; @winowiecki2021]. The LDSF has been applied at over 55,000 sampling locations in the tropics over the past two decades, producing one of the largest consistent databases of ground observations on land health. Because the indicators are measured in the same way everywhere, they can be compared across sites and over time, a bit like a standardized health check-up, but for land rather than for people.
+
+A total of about 1,100 sampling locations from 7 LDSF sites in Somalia were also part of the underlying data used to assess soil and land health in AARAN, and to conduct the analysis of restoration effort for the different clusters of the project. These data were collected as part of LDSF surveys in 2024, 2025, and 2026. Soil data was collected from one of these sites (Guriel) and analysed in Nairobi, Kenya.
+
+Five LDSF-based indicators were used, each representing a key aspect of soil and land health:
+
+1. **Tree cover**: the proportion of area covered by woody vegetation, an indicator of vegetation density and habitat provision.
+2. **Erosion**: the prevalence or severity of soil erosion, a direct measure of land degradation.
+3. **Root depth restriction at 50 cm (RDR50)**: a measure of physical limitations to root development, reflecting soil depth and compaction constraints.
+4. **Soil pH**: an indicator of soil chemical conditions, with values far from neutral generally limiting nutrient availability and plant productivity.
+5. **Soil organic carbon (SOC)**: a core indicator of soil fertility, water-holding capacity, and carbon storage.
+
+### Model-based clustering
+
+Sampled indicator values were standardized prior to analysis and clustered into three groups using model-based clustering implemented in the `mclust` library in R Statistics (@scrucca2023). Unlike distance-based methods such as k-means, Gaussian mixture models fit a probabilistic model to the data and assign observations to clusters based on the posterior probability of membership. The number of clusters was set to three to match the operational need for low, medium, and high restoration effort classes.
+
+### Interpreting clusters as restoration effort classes
+
+The three resulting clusters were manually interpreted as restoration effort classes based on the distribution of indicator values in each cluster. The cluster with high erosion, low SOC, and acidic or alkaline pH was classified as high restoration effort (high concern), while the cluster with low erosion, higher SOC, and near-neutral pH was classified as low restoration effort (low concern). The cluster with intermediate indicator values was classified as medium restoration effort (medium concern). Interpretation was supported by the indicator distributions shown in the Results section.
+
+The following considerations were taken into account when interpreting the clusters:
+
+* Areas with low SOC and high erosion are considered to be highly degraded and may require considerable resources and efforts to restore. Hence , active restoration will be required such as the establishment  of soil and water conservation measures (e.g. halfmoons or terracing) combined with tree planting and/or grass re-seeding.
+* Alkaline soils (pH> 7.5) can be high in SOC due to high clay content, but may also be challenging to restore when degraded.
+* High tree cover in combination with low SOC and high erosion, can indicate invasive species which may require removal.
+* High historic SOC concentrations indicate a high potential for carbon storage. Such areas generally also have a higher level of inherent resilience and may require less effort to restore.
+* RDR50 maps where roots are physically restricted within the top 0.5 m of soil, indicating reduced access to water and nutrients and therefore lower potential vegetation growth. It helps decide whether to favor shallow‑rooted species, invest in breaking hardpans, or limit expectations for deep‑rooted vegetation in a given area.
+
+### Probability surfaces and variable importance
+
+In order to scale the analysis to the country level, indicator maps were produced by using predictive models that learn the relationship between the LDSF ground observations (stored in a global database of field data from thousands of sites worldwide) and freely available satellite and environmental data, such as climate, terrain, and spectral information [@sanchez2009; @vagen2016a]. Once a model has "learned" these relationships, it can estimate the indicator values for every location in the country. We produced these maps at a spatial resolution of 250 m for the purpose of this exercise, but more detailed maps can also be generated using this approach. The reliability of this approach rests on the size and quality of the underlying ground truth database, which for the LDSF is the global tropics.
+
+For each restoration effort class, a random forest classification model was developed using the sampled indicator values as predictors of class membership. The models were applied to the full indicator raster stack to produce spatially explicit probability surfaces, expressing for each pixel the probability of belonging to the low, medium, or high restoration effort class. Variable importance measures from the random forest models were used to identify which indicators most strongly distinguish each class, providing insight into the drivers of the observed patterns. Together, the class maps and probability surfaces support spatially explicit prioritization of restoration interventions across Somalia.
+
+## Results
+Our analysis shows that SOC is low overall (median SOC below 10 g/kg), but with some sampled locations with SOC higher than 20 g/kg (@fig-indicators_distr_som). Erosion is high overall (median > 60%), tree cover is highly variable, while pH ranges mostly from neutral to alkaline, many parts of the country having pH > 7.5. The Mclust model produced three restoration-effort groups, as described in @sec-methods. @tbl-cluster-summary summarizes the mean and median indicator values for each class, based on the randomly sampled points.
+
+1. _Low concern_: This class is characterized by moderate tree cover (mean 46%, median 47%), comparatively low erosion prevalence (mean 51%, median 49%), the highest SOC content of the three classes (mean 8.7, median 7.8 g/kg), near-neutral soil conditions (mean pH 7.1) and moderate RDR50 values (~47%). Overall, the relatively high vegetation cover, low erosion, and high soil organic carbon indicate comparatively favourable ecosystem conditions.
+2. _Medium concern_: This class is characterized by higher tree cover (mean 59%, median 58%), moderate erosion prevalence (mean 61%, median 61%), moderate SOC content (mean 6.8, median 6.7 g/kg), near-neutral to slightly alkaline pH (mean 6.8) and intermediate RDR50 values (mean 56%). The class represents mixed ecosystem conditions, with high vegetation cover and near-neutral soils, but lower SOC than the low-concern class.
+3. _High concern_: This class is characterized by very low tree cover (mean 24%, median 21%), high erosion prevalence (mean 70%, median 70%), very low SOC content (mean 3.7, median 3.6 g/kg), alkaline soil conditions (mean pH 7.5) and relatively low RDR50 values (~49%). The combination of sparse vegetation, high erosion, low soil organic carbon and alkaline soils indicates the strongest signs of ecosystem degradation among the three classes and therefore the greatest restoration concern. The very low SOC values mean that productivity is low and ecosystem services are impaired.
+
+Areas classified as high restoration effort correspond to high concern, as they combine indicators associated with active or severe degradation, such as high erosion, low SOC, and unfavourable soil conditions (e.g. high pH). Conversely, areas of low restoration effort reflect comparatively healthy land and are of low concern, while medium effort areas fall between these extremes. The restoration effort gradient is therefore simultaneously a gradient of degradation concern: where intervention needs (effort) are greatest, the underlying land health condition gives the greatest cause for concern.
+
+```{r}
+#| label: tbl-cluster-summary
+#| tbl-cap: "Mean (median) indicator values per concern class, based on 25,000 randomly sampled points across Somalia."
+#|
+sample_df <- read.csv(file.path("outputs_report", "Vector_CSVs", "sample_df_25k.csv"))
+sample_df$concern <- factor(
+  c("hc" = "High concern", "mc" = "Medium concern", "lc" = "Low concern")[
+    c("hc", "mc", "lc")[sample_df$cluster]
+  ],
+  levels = c("Low concern", "Medium concern", "High concern")
+)
+inds <- c("TreeCover", "Erosion", "RDR50", "pH", "SOC")
+cluster_summary <- do.call(rbind, lapply(split(sample_df, sample_df$concern), function(x) {
+  m <- colMeans(x[, inds], na.rm = TRUE)
+  md <- apply(x[, inds], 2, median, na.rm = TRUE)
+  data.frame(
+    Class = as.character(x$concern[1]),
+    setNames(
+      as.data.frame(t(sprintf("%.1f (%.1f)", m, md))),
+      inds
+    )
+  )
+}))
+kable(cluster_summary, row.names = FALSE,
+      col.names = c("Class", "Tree cover (%)", "Erosion (%)", "RDR50 (%)", "pH", "SOC (g/kg)"))
+```
+
+{{< pagebreak >}}
+
+As we see in @fig-indicators_distr_som, areas with high concern in terms of land degradation have high erosion (the red density graph is skewed to the right) while areas with low concern have low erosion (the blue density graph is skewed to the left). If we look at pH, we see that areas with high concern have high pH, while these areas have very low SOC (the blue density graph is skewed to the left in the SOC panel in @fig-indicators_distr_som). For tree cover (bottom panel), the picture is a bit more mixed, but areas with high concern generally have very low tree cover.These groups provide the main classification used in the report, which we use to classify restoration effort within and across AARAN clusters.
+
+![Graph showing the distribution of indicator values for each cluster across the randomly sampled points used to generate land restoration effort custers](report_pngs/clusters_indicators_density.png){#fig-indicators_distr_som}
+
+{{< pagebreak >}}
+
+### Random Forest modeling results
+
+We used the Random Forest algorithm (@breiman2001) to fit a model that was used to predict low, medium, and high restoration effort. It produces a class-specific probability surface for each class, and variable importance is assessed with class-specific (one-vs-rest) models to show which indicators contribute most to each class prediction.
+
+#### Variable importance
+
+Variable importance measures show how useful each indicator is for predicting a given restoration effort class. Random forests work by repeatedly splitting the data on the indicator values; at each split, an indicator that cleanly separates the classes reduces the uncertainty ("impurity") of the classification. Importance is calculated as the total reduction in impurity achieved by each indicator across all splits in the model: the larger the reduction, the more the model relies on that indicator. The graphs in @fig-importance show this importance for each class, with longer bars indicating indicators that contribute more to the class prediction.
+
+The results indicate that SOC is a strong predictor of high restoration effort, reflecting the distribution of SOC values in @fig-indicators_distr_som where we see a strong separation of SOC values between high and medium/low effort areas. Erosion is high overall with overlapping distributions in @fig-indicators_distr_som.
+
+![Variable importance for each restoration effort class, based on class-specific (one-vs-rest) random forest models](report_pngs/AARAN_importance.png){#fig-importance}
+
+### Country-level land restoration effort assessment
+
+At country level, the restoration-effort map shows the spatial distribution of low, medium, and high effort areas. The map is derived from the random forest probability surfaces generated at 250m resolution for the whole country by assigning each pixel to the class (low, medium, or high restoration effort) with the highest predicted probability. The area graph summarizes how many square kilometers fall within each effort class, excluding hyperarid parts of the country.
+
+The map reveals clear spatial patterns in restoration effort across Somalia. High effort areas, representing the greatest concern, are concentrated in the central and northern pastoral rangelands, where low SOC, high erosion prevalence, and alkaline soils coincide with sparse tree cover. Medium effort areas dominate the southern regions and the transitional zones between the agro-pastoral belt and the rangelands, reflecting moderate land health conditions but with signs of degradation. Low effort areas are mainly found in the northwestern highlands and along the southern riverine and agroecological zones, where comparatively higher tree cover and SOC indicate better land health. These patterns provide an entry point for prioritizing restoration interventions.
+
+::: {.callout-warning}
+## About 71% of the mapped area (or 408,155 km²)
+
+is classified as medium to high land degradation concern and will hence require significant investment in restoration efforts.
+:::
+
+```{r}
+#| label: fig-effort-map
+#| fig-cap: "Map showing the spatial distribution of land degradation concern (restoration effort) classes for Somalia, derived from the highest-probability class in the random forest probability stack."
+#|
+prob_stack_file <- file.path("outputs_report", "Raster", "AARAN_cluster_probabilities_stack.tif")
+effort_map_png <- file.path(figure_dir, "AARAN_effort_map.png")
+
+if (file.exists(prob_stack_file)) {
+  prob_stack <- rast(prob_stack_file)
+  names(prob_stack) <- c("lc", "mc", "hc")
+
+  # Assign each pixel to the class with the highest predicted probability
+  effort <- which.max(prob_stack)
+  levels(effort) <- data.frame(ID = 1:3, restoration_effort = effort_labels)
+
+  # Render to a high-resolution PNG with OSM background, scalebar and north arrow
+  tiles <- maptiles::get_tiles(effort, provider = "OpenStreetMap", zoom = 6, verbose = FALSE)
+
+  p <- ggplot() +
+    ggspatial::layer_spatial(tiles) +
+    tidyterra::geom_spatraster(data = effort) +
+    scale_fill_manual(values = effort_cols,
+                      labels = effort_labels,
+                      name = "Restoration effort",
+                      na.translate = FALSE,
+                      na.value = NA) +
+    ggspatial::annotation_scale(location = "bl", width_hint = 0.25) +
+    ggspatial::annotation_north_arrow(location = "tl",
+                                      style = ggspatial::north_arrow_nautical) +
+    coord_sf(xlim = terra::ext(effort)[1:2], ylim = terra::ext(effort)[3:4], expand = FALSE) +
+    labs(x = NULL, y = NULL) +
+    theme_minimal() +
+    theme(panel.grid = element_blank(),
+          legend.position = "bottom",
+          legend.justification = "center")
+
+  ggsave(effort_map_png, p, width = 9, height = 10, dpi = 300, bg = "white")
+
+  knitr::include_graphics(effort_map_png)
+} else {
+  cat("Generate the probability stack first: run src/sample_rasters_cluster.R without --skip-predict.\n")
+}
+```
+
+```{r}
+#| label: fig-effort-area
+#| fig-cap: "Total area per restoration effort class."
+#|
+if (exists("effort")) {
+  area_df <- as.data.frame(c(effort, cellSize(effort, unit = "km")), na.rm = TRUE)
+  names(area_df) <- c("effort_class", "area_km2")
+
+  area_summary <- area_df |>
+    group_by(effort_class) |>
+    summarise(area_km2 = sum(area_km2), .groups = "drop") |>
+    mutate(restoration_effort = factor(effort_labels[effort_class], effort_labels))
+
+  area_png <- file.path(figure_dir, "AARAN_effort_area.png")
+  p_area <- ggplot(area_summary, aes(restoration_effort, area_km2, fill = restoration_effort)) +
+    geom_col(width = 0.65) +
+    coord_flip() +
+    scale_fill_manual(values = effort_cols) +
+    scale_y_continuous(labels = \(x) format(x, big.mark = ",", scientific = FALSE)) +
+    labs(x = NULL, y = expression("Area (km"^2*")"), fill = NULL) +
+    theme_minimal(base_size = 11) +
+    theme(legend.position = "none")
+
+  ggsave(area_png, p_area, width = 6, height = 3, dpi = 300, bg = "white")
+  knitr::include_graphics(area_png)
+} else {
+  cat("Generate the probability stack first: run src/sample_rasters_cluster.R without --skip-predict.\n")
+}
+```
+
+### Watershed and cluster level analysis
+
+**TODO - Ivy**
+
+
+## Conclusions
+
+This report presents land health assessments for Somalia based on five biophysical indicators derived from the Land Degradation Surveillance Framework (LDSF). Model based clustering grouped the sampled indicator values into three restoration effort classes, which are also interpreted as levels of concern for land degradation. Of the mapped area, about 37% falls within medium and 34% within high restoration effort, together corresponding to roughly 408,000 km2, or 71% of the country classified here as medium to high concern. Low effort (least concern) areas account for the remaining 29%.
+
+Variable importance from the class specific random forest models shows that soil organic carbon is the strongest predictor of high restoration effort, reflecting the clear separation of SOC values between high and medium or low effort areas. Soil pH is particularly important for distinguishing the medium effort class, while erosion, although high overall, contributes relatively little to separating the classes because its distributions overlap strongly across them. The classification is therefore driven mainly by soil condition rather than by erosion alone, although the interactions between the two are important. The generally low SOC levels across much of the country underline the need for interventions that rebuild soil health.
+
+The resulting maps and probability surfaces provide a spatially explicit basis for prioritizing restoration interventions in Somalia. High effort areas are where investments such as soil and water conservation combined with vegetation re-establishment are most urgently needed, while low effort areas can serve as reference landscapes for sustainable land management. The same workflow can be repeated at watershed and cluster level, and updated as new ground data become available.
+
+{{< pagebreak >}}
+
