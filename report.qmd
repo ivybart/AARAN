@@ -64,7 +64,7 @@ The purpose of the report is to give an overview at country, watershed and clust
 
 ::: {.callout-note icon=false}
 ## Key Findings
-- **National Effort Distribution**: Approximately **41%** Medium restoration effort, **38%** Low restoration effort, and **21%** High restoration effort.
+- **National Effort Distribution**: Approximately **37%** Medium restoration effort, **34%** High restoration effort, and **29%** Low restoration effort.
 - **Biophysical Clustering**: Five indicators (tree cover, erosion, RDR50, soil pH, and SOC) grouped into 3 distinct operational management classes via Gaussian mixture modeling (`mclust`).
 - **Primary Predictive Drivers**: Tree cover and soil pH consistently show the highest predictive influence across class-specific Random Forest probability models.
 :::
@@ -77,7 +77,7 @@ The assessment covers the whole of Somalia. To obtain a representative sample of
 
 ### Biophysical indicators
 
-The indicators used in this assessment are drawn from the Land Degradation Surveillance Framework (LDSF), a standardized field method developed by ICRAF (CIFOR-ICRAF) for assessing soil and land health. The LDSF has been applied at over 55,000 sampling locations in the tropics over the past two decades, producing one of the largest consistent databases of ground observations on land health. Because the indicators are measured in the same way everywhere, they can be compared across sites and over time, a bit like a standardized health check-up, but for land rather than for people.
+The indicators used in this assessment are drawn from the Land Degradation Surveillance Framework (LDSF), a standardized field method developed by ICRAF (CIFOR-ICRAF) for assessing soil and land health [@vagen2013b; @winowiecki2021]. The LDSF has been applied at over 55,000 sampling locations in the tropics over the past two decades, producing one of the largest consistent databases of ground observations on land health. Because the indicators are measured in the same way everywhere, they can be compared across sites and over time, a bit like a standardized health check-up, but for land rather than for people.
 
 A total of about 1,100 sampling locations from 7 LDSF sites in Somalia were also part of the underlying data used to assess soil and land health in AARAN, and to conduct the analysis of restoration effort for the different clusters of the project. These data were collected as part of LDSF surveys in 2024, 2025, and 2026. Soil data was collected from one of these sites (Guriel) and analysed in Nairobi, Kenya.
 
@@ -91,7 +91,7 @@ Five LDSF-based indicators were used, each representing a key aspect of soil and
 
 ### Model-based clustering
 
-Sampled indicator values were standardized prior to analysis and clustered into three groups using model-based clustering implemented in the `mclust` library in R Statistics. Unlike distance-based methods such as k-means, Gaussian mixture models fit a probabilistic model to the data and assign observations to clusters based on the posterior probability of membership. The number of clusters was set to three to match the operational need for low, medium, and high restoration effort classes.
+Sampled indicator values were standardized prior to analysis and clustered into three groups using model-based clustering implemented in the `mclust` library in R Statistics [@scrucca2023]. Unlike distance-based methods such as k-means, Gaussian mixture models fit a probabilistic model to the data and assign observations to clusters based on the posterior probability of membership. The number of clusters was set to three to match the operational need for low, medium, and high restoration effort classes.
 
 ### Interpreting clusters as restoration effort classes
 
@@ -108,12 +108,16 @@ The following considerations were taken into account when interpreting the clust
 
 ### Probability surfaces and variable importance
 
-In order to scale the analysis to the country level, indicator maps were produced by using predictive models that learn the relationship between the LDSF ground observations (stored in a global database of field data from thousands of sites worldwide) and freely available satellite and environmental data, such as climate, terrain, and spectral information. Once a model has "learned" these relationships, it can estimate the indicator values for every location in the country. We produced these maps at a spatial resolution of 250 m for the purpose of this exercise, but more detailed maps can also be generated using this approach. The reliability of this approach rests on the size and quality of the underlying ground truth database, which for the LDSF is the global tropics.
+In order to scale the analysis to the country level, indicator maps were produced by using predictive models that learn the relationship between the LDSF ground observations (stored in a global database of field data from thousands of sites worldwide) and freely available satellite and environmental data, such as climate, terrain, and spectral information [@sanchez2009; @vagen2016a]. Once a model has "learned" these relationships, it can estimate the indicator values for every location in the country. We produced these maps at a spatial resolution of 250 m for the purpose of this exercise, but more detailed maps can also be generated using this approach. The reliability of this approach rests on the size and quality of the underlying ground truth database, which for the LDSF is the global tropics.
 
 For each restoration effort class, a random forest classification model was developed using the sampled indicator values as predictors of class membership. The models were applied to the full indicator raster stack to produce spatially explicit probability surfaces, expressing for each pixel the probability of belonging to the low, medium, or high restoration effort class. Variable importance measures from the random forest models were used to identify which indicators most strongly distinguish each class, providing insight into the drivers of the observed patterns. Together, the class maps and probability surfaces support spatially explicit prioritization of restoration interventions across Somalia.
 
 ## Results
 Our analysis shows that SOC is low overall (median SOC below 10 g/kg), but with some sampled locations with SOC higher than 20 g/kg (@fig-indicators_distr_som). Erosion is high overall (median > 60%), tree cover is highly variable, while pH ranges mostly from neutral to alkaline, many parts of the country having pH > 7.5. The Mclust model produced three restoration-effort groups, as described in @sec-methods.
+
+1. _Low concern_: This class is characterized by moderate tree cover (mean 46%, median 47%), comparatively low erosion prevalence (mean 51%, median 49%), the highest SOC content of the three classes (mean 8.7, median 7.8 g/kg), near-neutral soil conditions (mean pH 7.1) and moderate RDR50 values (\~47%). Overall, the relatively high vegetation cover, low erosion, and high soil organic carbon indicate comparatively favourable ecosystem conditions.
+2. _Medium concern_: This class is characterized by higher tree cover (mean 59%, median 58%), moderate erosion prevalence (mean 61%, median 61%), moderate SOC content (mean 6.8, median 6.7 g/kg), near-neutral to slightly alkaline pH (mean 6.8) and intermediate RDR50 values (mean 56%). The class represents mixed ecosystem conditions, with high vegetation cover and near-neutral soils, but lower SOC than the low-concern class.
+3. _High concern_: This class is characterized by very low tree cover (mean 24%, median 21%), high erosion prevalence (mean 70%, median 70%), very low SOC content (mean 3.7, median 3.6 g/kg), alkaline soil conditions (mean pH 7.5) and relatively low RDR50 values (\~49%). The combination of sparse vegetation, high erosion, low soil organic carbon and alkaline soils indicates the strongest signs of ecosystem degradation among the three classes and therefore the greatest restoration concern. The very low SOC values mean that productivity is low and ecosystem services are impaired.
 
 Throughout the report, the restoration effort classes are interpreted in terms of level of concern for land degradation. Areas classified as high restoration effort correspond to high concern, as they combine indicators associated with active or severe degradation, such as high erosion, low SOC, and unfavourable soil conditions (e.g. high pH). Conversely, areas of low restoration effort reflect comparatively healthy land and are of low concern, while medium effort areas fall between these extremes. The restoration effort gradient is therefore simultaneously a gradient of degradation concern: where intervention needs (effort) are greatest, the underlying land health condition gives the greatest cause for concern.
 
@@ -125,7 +129,7 @@ As we see in @fig-indicators_distr_som, areas with high concern in terms of land
 
 ## Random Forest Results
 
-A random forest model was used to predict low, medium, and high restoration effort. It produces a class-specific probability surface for each class, and variable importance is assessed with class-specific (one-vs-rest) models to show which indicators contribute most to each class prediction.
+A random forest model was used to predict low, medium, and high restoration effort [@breiman2001]. It produces a class-specific probability surface for each class, and variable importance is assessed with class-specific (one-vs-rest) models to show which indicators contribute most to each class prediction.
 
 ### Variable importance
 
@@ -137,136 +141,129 @@ The results indicate that SOC is a strong predictor of high restoration effort, 
 
 ## Country-Level Overview
 
-At country level, the restoration-effort map shows the spatial distribution of low, medium, and high effort areas. The area graph summarizes how many square kilometers fall within each effort class.
+At country level, the restoration-effort map shows the spatial distribution of low, medium, and high effort areas. The map is derived from the random forest probability surfaces generated at 250 m resolution for the whole country by assigning each pixel to the class with the highest predicted probability. The area graph summarizes how many square kilometers fall within each effort class, excluding hyperarid parts of the country.
 
-```{r}
-#| label: fig-country-restoration-effort-map
-#| fig-cap: "Restoration effort classes across Somalia."
-effort <- effort_raster()
+The map reveals clear spatial patterns in restoration effort across Somalia. High effort areas, representing the greatest concern, are concentrated in the central and northern pastoral rangelands, where low SOC, high erosion prevalence, and alkaline soils coincide with sparse tree cover. Medium effort areas dominate the southern regions and transitional zones between the agro-pastoral belt and the rangelands, reflecting moderate land health conditions but with signs of degradation. Low effort areas are mainly found in the northwestern highlands and along the southern riverine and agroecological zones, where comparatively higher tree cover and SOC indicate better land health. These patterns provide an entry point for prioritizing restoration interventions.
 
-if (!is.null(effort)) {
-  plot(effort, col = effort_cols, main = "Somalia Restoration Effort")
-} else {
-  cat("Attach or generate the country restoration-effort map raster at: ", cluster_file)
-}
-```
+::: {.callout-warning}
+## About 71% of the mapped area (408,155 km²)
 
-```{r}
-#| label: fig-country-restoration-effort-area
-#| fig-cap: "Area of Somalia under low, medium, and high restoration effort."
-effort <- effort_raster()
+is classified as medium to high land degradation concern and will therefore require significant investment in restoration efforts.
+:::
 
-if (!is.null(effort)) {
-  area_df <- as.data.frame(c(effort, cellSize(effort, unit = "km")), na.rm = TRUE)
-  names(area_df) <- c("effort_class", "area_km2")
+![Map showing the spatial distribution of land degradation concern (restoration effort) classes for Somalia, derived from the highest-probability class in the random forest probability stack.](report_pngs/AARAN_effort_map.png){#fig-effort-map width=70% fig-align="center"}
 
-  area_summary <- area_df |>
-    group_by(effort_class) |>
-    summarise(area_km2 = sum(area_km2), .groups = "drop") |>
-    mutate(restoration_effort = factor(effort_labels[effort_class], effort_labels))
+![Total area per restoration effort class.](report_pngs/AARAN_effort_area.png){#fig-effort-area}
 
-  ggplot(area_summary, aes(restoration_effort, area_km2, fill = restoration_effort)) +
-    geom_col(width = 0.65) +
-    scale_fill_manual(values = effort_cols) +
-    labs(x = "Restoration effort class", y = "Area (km2)", fill = NULL) +
-    theme_minimal() +
-    theme(legend.position = "none")
-} else {
-  cat("Attach or generate the country restoration-effort raster at: ", cluster_file)
-}
-```
+![Share of restoration concern classes by watershed.](report_pngs/AARAN_watershed_composition.png){#fig-watershed-concern-composition}
 
-```{r}
-if (exists("area_summary")) {
-  kable(area_summary, digits = 2)
-}
-```
+The figure above shows the distribution of the three concern classes across the watersheds. The results show that Watershed 8 in the Nugaal region has the highest percentage of area under high concern, while Watersheds 6 and 5 in Bay region barely have any area under high concern.
 
-![Share of restoration concern classes by watershed.](docx_media/image10.png){#fig-watershed-concern-composition}
+![Share of restoration concern classes by selected project cluster.](report_pngs/AARAN_cluster_composition.png){#fig-cluster-concern-composition}
 
-![Share of restoration concern classes by selected project cluster.](docx_media/image19.png){#fig-cluster-concern-composition}
+The figure above shows the distribution of the three concern classes across the clusters. The results show that KAALO_7 in the Nugaal region has the highest percentage of area under high concern, while GREDO_7 and GREDO_6 in Bay region barely have any area under high concern. CWW_8 in Gedo region is completely under low concern.
+
+The analysis can further be broken down into the watersheds and clusters contained within each watershed; this analysis is given in detail below.
 
 ## Watershed and Cluster-Level Analysis
 
-Degradation levels vary considerably between the project clusters, and therefore the level of restoration concern and the recommended restoration practices also vary by cluster. The distribution of the three concern classes across watersheds shows that Watershed 8 in the Nugaal region has the highest percentage of area under high concern, while Watersheds 5 and 6 in Bay region have little to no area under high concern.
+The graphs below compare indicator distributions at national , watershed and cluster scales. Under the high concern class, erosion and pH distributions are shifted to the right (higher values), indicating more severe erosion and less favorable pH conditions. In contrast, SOC, RDR50, and tree cover distributions are shifted left (lower values), reflecting reduced soil carbon, shallower effective rooting depth, and sparser tree cover in these areas.
 
-At cluster level, `KAALO_7` in Nugaal has the highest percentage of area under high concern. `GREDO_7` and `GREDO_6` in Bay have very limited high concern area, while `CWW_8` in Gedo is entirely under low concern. The analysis can therefore be broken down by watershed and by the cluster contained within each watershed.
+Across the high concern class indicators, the watershed median is generally higher than the national median, except for SOC, where the watershed median is lower. This suggests that, relative to the country, the watershed experiences more intense erosion, more extreme pH, and greater root-depth restriction, lower soil organic carbon but has higher tree cover.
+
+Medium concern classes show a roughly balanced (half–half) distribution, indicating mixed conditions with no strong skew toward extreme values. Low concern areas display a pattern nearly opposite to that of high concern areas; where high-concern distributions are skewed toward unfavourable values (e.g., high erosion/pH, low SOC/RDR50/tree cover), low-concern distributions are skewed toward more favourable values, and any overlap in direction covers a smaller area under the curve.
+
+Across subsequent watersheds and clusters in the following sections, the distribution shapes under the three concern classes remain generally similar; only the area under the curve varies. This indicates that the same general patterns of indicator behavior (e.g., shifts toward higher erosion/pH and lower SOC/RDR50/tree cover in high-concern areas) hold across subregions, with differences mainly in the extent of each pattern rather than in its direction.
 
 ### Watershed 1 and KAALO_6
 
-Watershed 1 contains the `KAALO_6` cluster. Indicator distributions compare country and watershed medians, while the cluster summary compares country, watershed and cluster medians. Under the high concern class, erosion and pH distributions are shifted toward higher values, indicating more severe erosion and less favourable pH conditions. In contrast, SOC, RDR50 and tree cover are shifted toward lower values, reflecting reduced soil carbon, shallower effective rooting depth and sparser vegetation in high concern areas.
+The map below shows the restoration concern classes within Watershed 1 and highlights the KAALO_6 cluster contained within the watershed.
 
-![Restoration concern map for Watershed 1 and the KAALO_6 cluster.](docx_media/image32.png){#fig-watershed-1-map}
+![Restoration concern map for Watershed 1 and the KAALO_6 cluster.](report_pngs/AARAN_watershed_1_map.png){#fig-watershed-1-map width=85% fig-align="center"}
 
-![Watershed 1 indicator distributions by restoration concern class.](docx_media/image3.png){#fig-watershed-1-distribution}
+![Watershed 1 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_1_watershed_ridges.png){#fig-watershed-1-distribution}
 
-![KAALO_6 indicator distributions by restoration concern class.](docx_media/image15.png){#fig-kaalo-6-distribution}
+The watershed ridgeline plot shows the distribution of each indicator across the three concern classes, with median lines showing how Watershed 1 compares to the country median. Across the indicators, the watershed median is generally higher than the national median, except for SOC, where the watershed median is lower. This suggests that, relative to the country, Watershed 1 experiences more intense erosion, more extreme pH and greater root-depth restriction, with lower soil organic carbon but higher tree cover.
 
-Across high concern indicators, the watershed median is generally higher than the national median, except for SOC, where the watershed median is lower. This suggests that, relative to the country, Watershed 1 experiences more intense erosion, more extreme pH and greater root-depth restriction, with lower soil organic carbon but higher tree cover. Across indicators, the `KAALO_6` median is generally higher than the national and watershed medians, except for SOC, where it is lower than the country median but higher than the watershed median.
+![KAALO_6 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_1_cluster_ridges.png){#fig-kaalo-6-distribution}
+
+The KAALO_6 ridgeline plot compares the cluster median with the watershed and country medians. Across the indicators, the KAALO_6 median is generally higher than the national and watershed medians, except for SOC, where it is lower than the country median but higher than the watershed median.
 
 ### Watershed 2 and KAALO_1
 
-Watershed 2 contains the `KAALO_1` cluster. Across high concern indicators, the watershed median is generally lower than the national median. This suggests that, relative to the country, the watershed has relatively lower pH and root-depth restriction, higher soil organic carbon and higher tree cover, while erosion remains an important pressure.
+Watershed 2 contains the KAALO_1 cluster. The map below shows the restoration concern classes within Watershed 2 and highlights the KAALO_1 cluster contained within the watershed.
 
-![Restoration concern map for Watershed 2 and the KAALO_1 cluster.](docx_media/image23.png){#fig-watershed-2-map}
+![Restoration concern map for Watershed 2 and the KAALO_1 cluster.](report_pngs/AARAN_watershed_2_map.png){#fig-watershed-2-map width=85% fig-align="center"}
 
-![Watershed 2 indicator distributions by restoration concern class.](docx_media/image28.png){#fig-watershed-2-distribution}
+![Watershed 2 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_2_watershed_ridges.png){#fig-watershed-2-distribution}
 
-![KAALO_1 indicator distributions by restoration concern class.](docx_media/image1.png){#fig-kaalo-1-distribution}
+The watershed ridgeline plot shows how Watershed 2 compares to the national median across indicators and concern classes. Across the indicators, the watershed median is generally lower than the national median except for erosion. This suggests that, relative to the country, the watershed experiences higher degradation pressure due to higher erosion, lower SOC, lower tree cover and limited rooting depth.
 
-Across indicators, the `KAALO_1` median generally lies between the country and watershed medians for erosion, is higher than both for root depth restriction, and lower for SOC and tree cover. This pattern suggests that `KAALO_1` experiences intermediate erosion pressure but more severe physical rooting constraints than either the broader watershed or the country average. Lower SOC and tree cover imply weaker vegetation structure and reduced carbon storage, pointing to conditions that may be more vulnerable to further decline unless restoration specifically targets vegetation recovery and SOC accumulation.
+![KAALO_1 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_2_cluster_ridges.png){#fig-kaalo-1-distribution}
+
+Across the indicators, the KAALO_1 median shows a mixed pattern where it is higher than the watershed and national medians for root depth restriction, lower than both for tree cover and SOC while lying in between the two for pH.
+
+This pattern suggests that KAALO_1 experiences intermediate erosion pressure and pH conditions than either the broader watershed or the country median. At the same time, lower SOC and tree cover imply weaker vegetation structure and reduced SOC, pointing to conditions that may be more degraded or more vulnerable to further decline unless restoration specifically targets vegetation restoration and SOC accumulation.
 
 ### Watershed 3 and CWW_4
 
-Watershed 3 contains the `CWW_4` cluster. Across high concern indicators, the watershed median is generally lower than the national median, except for erosion and tree cover, where the watershed median is higher. This indicates that the watershed experiences stronger erosion pressure and higher tree cover, but relatively lower pH, lower root-depth restriction and higher soil organic carbon compared with the national scale.
+Watershed 3 contains the CWW_4 cluster. The map below shows the restoration concern classes within Watershed 3 and highlights the CWW_4 cluster contained within the watershed.
 
-![Restoration concern map for Watershed 3 and the CWW_4 cluster.](docx_media/image9.png){#fig-watershed-3-map}
+![Restoration concern map for Watershed 3 and the CWW_4 cluster.](report_pngs/AARAN_watershed_3_map.png){#fig-watershed-3-map width=85% fig-align="center"}
 
-![Watershed 3 indicator distributions by restoration concern class.](docx_media/image12.png){#fig-watershed-3-distribution}
+![Watershed 3 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_3_watershed_ridges.png){#fig-watershed-3-distribution}
 
-![CWW_4 indicator distributions by restoration concern class.](docx_media/image7.png){#fig-cww-4-distribution}
+The watershed ridgeline plot shows how Watershed 3 compares to the national median across indicators and concern classes. Across the indicators, the watershed median is generally lower than the national median, except for erosion and tree cover, where the watershed median is higher. This indicates that the watershed experiences stronger erosion pressure and higher tree cover, but relatively lower pH, lower root-depth restriction and lower soil organic carbon compared with the national scale. This may signal that the restoration should focus on ground cover restoration, runoff control and gully stabilization since the tree cover is relatively high but erosion is as well.
 
-Across indicators, the `CWW_4` median is lower than the country and watershed medians for root depth restriction, SOC and tree cover, but higher than both for erosion and intermediate for pH. These results suggest that the cluster faces stronger erosion pressure, more severe root-depth restriction, and reduced vegetation and SOC relative to the country and watershed scales, while experiencing intermediate pH conditions.
+![CWW_4 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_3_cluster_ridges.png){#fig-cww-4-distribution}
+
+Across the indicators, the CWW_4 median is lower than the country and watershed medians for root depth restriction, SOC and tree cover, but higher than both for erosion and intermediate for pH. These results suggest that the cluster faces stronger erosion pressure, more severe root depth restriction, and reduced vegetation and SOC relative to the country and watershed scales, while experiencing intermediate pH conditions.
 
 ### Watersheds 5 and 6 with GREDO_6 and GREDO_7
 
-Watersheds 5 and 6 contain the `GREDO_6` and `GREDO_7` clusters. No areas in these watersheds meet the high-concern class; conditions are dominated by medium concern followed by low concern. This is consistent with landscapes where severe degradation is limited and most areas fall into moderate or better condition classes.
+Watersheds 5 and 6 contain the GREDO_6 and GREDO_7 clusters. The map below shows the restoration concern classes within Watersheds 5 and 6 and highlights the GREDO_6 and GREDO_7 clusters contained within these watersheds.
 
-![Restoration concern map for Watersheds 5 and 6 and the GREDO_6 and GREDO_7 clusters.](docx_media/image18.png){#fig-watershed-5-6-map}
+![Restoration concern map for Watersheds 5 and 6 and the GREDO_6 and GREDO_7 clusters.](report_pngs/AARAN_watershed_5_6_map.png){#fig-watershed-5-6-map width=85% fig-align="center"}
 
-![Watersheds 5 and 6 indicator distributions by restoration concern class.](docx_media/image30.png){#fig-watershed-5-6-distribution}
+![Watersheds 5 and 6 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_5_6_watershed_ridges.png){#fig-watershed-5-6-distribution}
 
-![GREDO_6 indicator distributions by restoration concern class.](docx_media/image27.png){#fig-gredo-6-distribution}
+The watershed ridgeline plot shows how Watersheds 5 and 6 compare to the national median across indicators and concern classes. Conditions are dominated by medium concern followed by low concern, while high concern is present only as a very small trace area. Based on the raster area summary, the combined high concern area across Watersheds 5 and 6 is about 0.31 km², or roughly 0.009% of the mapped area in these two watersheds. This is why the high concern class appears in the ridgeline plot, but is barely visible in the area-based composition graph and map.
 
-For `GREDO_6`, the median is lower than the country and watershed medians for root depth restriction and tree cover, but higher than both for pH and SOC. Erosion is intermediate, with the country erosion median higher than the cluster median. This suggests shallower effective rooting depth and more sparse tree cover than the broader regions, but more favourable pH, higher SOC and lower erosion compared with the national scale.
+![GREDO_6 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_5_6_credo_6_ridges.png){#fig-gredo-6-distribution}
 
-![GREDO_7 indicator distributions by restoration concern class.](docx_media/image2.png){#fig-gredo-7-distribution}
+For GREDO_6, the median is lower than the country and watershed medians for root depth restriction and tree cover, but higher than both for pH and SOC. Erosion is intermediate, with the country erosion median higher than the cluster median. This suggests shallower effective rooting depth and more sparse tree cover than the broader regions, but more favourable pH, higher SOC and lower erosion compared with the national scale.
 
-For `GREDO_7`, the median is lower than the country and watershed medians for pH, higher than both for root depth restriction and tree cover, and intermediate for erosion and SOC. This suggests less favourable pH conditions but deeper effective rooting depth and denser tree cover than both broader scales. Erosion pressure is moderately lower than the country median but slightly above the watershed median, while SOC is better than the country overall but not as high as the watershed median.
+![GREDO_7 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_5_6_credo_7_ridges.png){#fig-gredo-7-distribution}
+
+For GREDO_7, the median is lower than the country and watershed medians for pH, higher than both for root depth restriction and tree cover, and intermediate for erosion and SOC. This suggests less favourable pH conditions but deeper effective rooting depth and denser tree cover than both broader scales. Erosion pressure is moderately lower than the country median but slightly above the watershed median, while SOC is better than the country overall but not as high as the watershed median.
 
 ### Watershed 7 and CWW_8
 
-Watershed 7 contains the `CWW_8` cluster. Across high concern indicators, the watershed median is generally lower than the country median, except for SOC and pH, where the watershed median is higher. This suggests that the watershed has higher soil organic carbon and slightly higher pH in high concern areas, while erosion, root depth restriction and tree cover tend to be lower.
+Watershed 7 contains the CWW_8 cluster. The map below shows the restoration concern classes within Watershed 7 and highlights the CWW_8 cluster contained within the watershed.
 
-![Restoration concern map for Watershed 7 and the CWW_8 cluster.](docx_media/image20.png){#fig-watershed-7-map}
+![Restoration concern map for Watershed 7 and the CWW_8 cluster.](report_pngs/AARAN_watershed_7_map.png){#fig-watershed-7-map width=85% fig-align="center"}
 
-![Watershed 7 indicator distributions by restoration concern class.](docx_media/image14.png){#fig-watershed-7-distribution}
+![Watershed 7 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_7_watershed_ridges.png){#fig-watershed-7-distribution}
 
-![CWW_8 indicator distributions by restoration concern class.](docx_media/image5.png){#fig-cww-8-distribution}
+The watershed ridgeline plot shows how Watershed 7 compares to the national median across indicators and concern classes. Across the indicators, the watershed median is generally lower than the country median, except for SOC and pH, where the watershed median is higher. This suggests that the watershed has higher soil organic carbon and slightly higher pH compared to the national scale, while erosion, root depth restriction and tree cover tend to be lower.
 
-Across indicators, the `CWW_8` median is lower than the country and watershed medians for erosion and root depth restriction, but higher for pH and SOC, and lower for tree cover. The cluster falls entirely within the low-concern class, so restoration efforts should focus on conservation and enhancing vegetation cover to maintain and improve existing conditions.
+![CWW_8 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_7_cluster_ridges.png){#fig-cww-8-distribution}
+
+Across indicators, the CWW_8 median is lower than the country and watershed medians for erosion, tree cover and root depth restriction, but higher for pH and SOC. The cluster falls entirely within the low-concern class, so restoration efforts should focus on conservation and enhancing vegetation cover to maintain and improve existing conditions.
 
 ### Watershed 8 and KAALO_7
 
-Watershed 8 contains the `KAALO_7` cluster. The watershed and cluster are dominated by high concern. Across high concern indicators, the watershed median is generally lower than the national median, except for erosion and pH, where the watershed median is higher. This suggests that, relative to the country, the watershed experiences more intense degradation across key indicators.
+Watershed 8 contains the KAALO_7 cluster. The map below shows the restoration concern classes within Watershed 8 and highlights the KAALO_7 cluster contained within the watershed.
 
-![Restoration concern map for Watershed 8 and the KAALO_7 cluster.](docx_media/image11.png){#fig-watershed-8-map}
+![Restoration concern map for Watershed 8 and the KAALO_7 cluster.](report_pngs/AARAN_watershed_8_map.png){#fig-watershed-8-map width=85% fig-align="center"}
 
-![Watershed 8 indicator distributions by restoration concern class.](docx_media/image16.png){#fig-watershed-8-distribution}
+![Watershed 8 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_8_watershed_ridges.png){#fig-watershed-8-distribution}
 
-![KAALO_7 indicator distributions by restoration concern class.](docx_media/image17.png){#fig-kaalo-7-distribution}
+The watershed ridgeline plot shows how Watershed 8 compares to the national median across indicators and concern classes. The watershed and cluster are dominated by high concern as shown in the map as well as the distribution graphs where we see the high concern class in region being highly skewed in the negative directions for the indicators such as to the left for tree cover, root depth restriction and SOC; to the right for erosion and pH. This observation implies that, relative to the country, the watershed experiences more intense degradation across key indicators.
 
-For `KAALO_7`, the pattern closely matches its parent watershed. The median is lower than the national median for root depth restriction and tree cover, close to the watershed median for SOC, and higher for pH and erosion. This indicates that the cluster is generally more degraded than the broader national scale. Restoration efforts in `KAALO_7` should prioritize erosion control, soil conservation and increasing vegetation cover through interventions such as contour bunds, mulching and improved grazing management. Limited effective rooting depth may hinder the establishment of deep-rooted species; where feasible, soil decompaction could be considered before planting, or shallow-rooted, stress-tolerant species should be prioritized.
+![KAALO_7 indicator distributions by restoration concern class.](report_pngs/AARAN_watershed_8_cluster_ridges.png){#fig-kaalo-7-distribution}
+
+For KAALO_7, the pattern closely matches its parent watershed. The median is lower than the national median for root depth restriction and tree cover, close to the watershed median for SOC, and higher for pH and erosion. This indicates that the cluster is generally more degraded than the broader national scale. Restoration efforts in KAALO_7 should prioritize erosion control, soil conservation and increasing vegetation cover through interventions such as contour bunds, mulching and improved grazing management. Limited effective rooting depth may hinder the establishment of deep-rooted species; where feasible, soil decompaction could be considered before planting, or shallow-rooted, stress-tolerant species should be prioritized.
 
 ## Restoration Recommendations
 
@@ -278,4 +275,16 @@ For `KAALO_7`, the pattern closely matches its parent watershed. The median is l
 
 ## Conclusion
 
-The output shows that about 41% of Somalia is classified as medium restoration effort, 38% as low, and 21% as high. The variable importance graphs indicate that tree cover and pH are the most influential indicators for predicting restoration effort classes. These results can inform restoration planning and prioritization across Somalia.
+This report presents land health assessments for Somalia based on five biophysical indicators derived from the Land Degradation Surveillance Framework (LDSF). Model based clustering grouped the sampled indicator values into three restoration effort classes, which are also interpreted as levels of concern for land degradation. Of the mapped area, about 37% falls within medium and 34% within high restoration effort, together corresponding to roughly 408,155 km2, or 71% of the country classified here as medium to high concern. Low effort (least concern) areas account for the remaining 29%.
+
+Variable importance from the class specific random forest models shows that soil organic carbon is the strongest predictor of high restoration effort, reflecting the clear separation of SOC values between high and medium or low effort areas. Soil pH is particularly important for distinguishing the medium effort class, while erosion, although high overall, contributes relatively little to separating the classes because its distributions overlap strongly across them. The classification is therefore driven mainly by soil condition rather than by erosion alone, although the interactions between the two are important. The generally low SOC levels across much of the country underline the need for interventions that rebuild soil health.
+
+The resulting maps and probability surfaces provide a spatially explicit basis for prioritizing restoration interventions in Somalia. High effort areas are where investments such as soil and water conservation combined with vegetation re-establishment are most urgently needed, while low effort areas can serve as reference landscapes for sustainable land management. The same workflow can be repeated at watershed and cluster level, and updated as new ground data become available.
+
+{{< pagebreak >}}
+
+## Bibliography
+
+```{=typst}
+#bibliography("bibliography.bib", title: none, style: "apa")
+```

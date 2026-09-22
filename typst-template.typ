@@ -273,6 +273,10 @@
         )
       ]
     ]
+    v(0.9em)
+    align(center)[
+      #image("report_pngs/somalia_cover.jpg", height: 9.6cm)
+    ]
   }
 
   // Table of Contents (own page, no header/footer; numbering continues so content starts on page 3)

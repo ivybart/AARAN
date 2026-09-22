@@ -6,3 +6,8 @@ report.html
 **/*.quarto_ipynb
 .vscode/settings.json
 data/
+.docx_media/
+.RData
+.RHistory
+.R-proj.user
+.r-lib/
